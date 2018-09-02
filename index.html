@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RobArm Plot</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<style>
+    body {
+        overflow-x: hidden;
+    }
+
+    .contacc {
+        display: inline-block;
+        width: 100vw;
+        max-width: 450px;
+
+
+    }
+</style>
+
+<body>
+
+    <!-- nav -->
+    <nav>
+        <div class="nav-wrapper blue">
+            <a href="#" class="brand-logo center">RobArm</a>
+
+        </div>
+    </nav>
+
+    <!-- navend -->
+
+    <div class="contacc">
+        <h4>X Linear Acceleration</h4>
+        <h5>Date:
+            <span id="date"></span>
+        </h5>
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+    <!-- y -->
+    <div class="contacc">
+        <h4>Y Linear Acceleration</h4>
+        <h5>Date:
+            <span id="date"></span>
+        </h5>
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="yacc"></canvas>
+        </div>
+    </div>
+
+
+    <!-- z -->
+    <div class="contacc">
+        <h4>Z Linear Acceleration</h4>
+        <h5>Date:
+            <span id="date"></span>
+        </h5>
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="zacc"></canvas>
+        </div>
+    </div>
+    <!-- res acc -->
+    <div class="contacc">
+        <h4>Res Linear Acceleration</h4>
+
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="resacc"></canvas>
+        </div>
+    </div>
+    <!-- yaw -->
+    <div class="contacc">
+        <h4>Yaw</h4>
+
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="yaw"></canvas>
+        </div>
+    </div>
+    <!-- roll -->
+    <div class="contacc">
+        <h4>Roll</h4>
+
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="roll"></canvas>
+        </div>
+    </div>
+
+    <!-- pitch -->
+    <div class="contacc">
+        <h4>Pitch</h4>
+
+        <div class="chart-container" style=" width:100%; margin: auto;">
+            <canvas id="pitch"></canvas>
+        </div>
+    </div>
+    <video class="streamVideo" id="video" width="300" height="300" autoplay></video> 
+
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+    <script>
+
+        var socket = io.connect('10.4.30.26:8001'); //connect to server
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "X-Acc",
+                    borderColor: "#FF5733",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+        //y
+        var ctxy = document.getElementById('yacc').getContext('2d');
+        var charty = new Chart(ctxy, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Y-Acc",
+                    borderColor: "#FF5733",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+        //z
+        var ctxz = document.getElementById('zacc').getContext('2d');
+        var chartz = new Chart(ctxz, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Y-Acc",
+                    borderColor: "#FF5733",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+        //res
+        var ctxresacc = document.getElementById('resacc').getContext('2d');
+        var chartresacc = new Chart(ctxresacc, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Res-Acc",
+                    borderColor: "#f98900",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+
+        //yaw
+
+        var ctxyaw = document.getElementById('yaw').getContext('2d');
+        var chartyaw = new Chart(ctxyaw, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Yaw",
+                    borderColor: "#00e0cd",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+
+        //ROll
+
+        var ctxroll = document.getElementById('roll').getContext('2d');
+        var chartroll = new Chart(ctxroll, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Roll",
+                    borderColor: "#e9ff00",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+        //Pitch
+
+        var ctxpitch = document.getElementById('pitch').getContext('2d');
+        var chartpitch = new Chart(ctxpitch, {
+            // The type of chart we want to create
+            type: 'line',
+            // The data for our dataset
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Pitch",
+                    borderColor: "#7af442",
+                    data: [],
+                    fill: false,
+                    pointStyle: 'circle',
+                    backgroundColor: '#3498DB',
+                    pointRadius: 1,
+                    pointHoverRadius: 3,
+                    lineTension: 0,
+                }]
+            },
+            // Configuration options go here
+            options: {}
+
+        });
+        socket.on('temp', function (data) {
+            console.log(data);
+
+            if (chart.data.labels.length != 75) {
+                chart.data.labels.push(data.time); 
+                chart.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.xacc); 
+                });
+
+                // y
+                charty.data.labels.push(data.time); 
+                charty.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.yacc); 
+                });
+                //z
+                chartz.data.labels.push(data.time); 
+                chartz.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.zacc); 
+                });
+                //Res Acc
+                //z
+                chartresacc.data.labels.push(data.time);  
+                chartresacc.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.resacc); 
+                });
+                //Yaw
+
+                chartyaw.data.labels.push(data.time);  
+                chartyaw.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.yaw); 
+                });
+                //Roll
+
+                chartroll.data.labels.push(data.time); 
+                chartroll.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.roll); 
+                });
+
+                //Pitch
+
+
+                chartpitch.data.labels.push(data.time);  
+                chartpitch.data.datasets.forEach((dataset) => {
+                    dataset.data.push(data.pitch); 
+                });
+
+            }
+            else { 
+                chart.data.labels.shift(); 
+                chart.data.labels.push(data.time); 
+                chart.data.datasets.forEach((dataset) => {
+                    dataset.data.shift(); 
+                    dataset.data.push(data.xacc);
+                });
+                //y
+                charty.data.labels.shift();  
+                charty.data.labels.push(data.time);   
+                charty.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();    
+                    dataset.data.push(data.yacc);    
+                });
+                //z
+
+                chartz.data.labels.shift();  
+                chartz.data.labels.push(data.time);   
+                chartz.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();    
+                    dataset.data.push(data.zacc);    
+                });
+                //Res Acc
+                chartresacc.data.labels.shift();  
+                chartresacc.data.labels.push(data.time);   
+                chartresacc.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();    
+                    dataset.data.push(data.resacc);    
+                });
+
+                //yaw
+                chartyaw.data.labels.shift();  
+                chartyaw.data.labels.push(data.time);   
+                chartyaw.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();    
+                    dataset.data.push(data.yaw);    
+                });
+
+                //Roll
+                chartroll.data.labels.shift();  
+                chartroll.data.labels.push(data.time);   
+                chartroll.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();    
+                    dataset.data.push(data.roll);    
+                });
+                //Pitch
+                chartpitch.data.labels.shift();  
+                chartpitch.data.labels.push(data.time);   
+                chartpitch.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();    
+                    dataset.data.push(data.pitch);    
+                });
+            }
+            chart.update(); //Update the graph.
+            charty.update();
+            chartz.update();
+            chartresacc.update();
+            chartyaw.update();
+            chartroll.update();
+            chartpitch.update();
+        });
+        //
+        var video = document.getElementById('video');
+
+        // Get access to the camera!
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Not adding `{ audio: true }` since we only want video now
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+                video.src = window.URL.createObjectURL(stream);
+                video.play();
+            });
+        }
+
+
+
+//
+
+    </script>
+</body>
+<style>
+    h4 {
+        text-align: center;
+        font-family: 'Lato', sans-serif;
+    }
+
+    h5 {
+        text-align: center;
+        font-family: 'Lato', sans-serif;
+    }
+
+    p {
+        text-align: center;
+        font-family: 'Lato', sans-serif;
+    }
+
+    .streamVideo {
+        position: absolute;
+        margin-right: 0;
+        right: 0;
+        bottom: 0;
+        width: 200px;
+        height: 200px;
+    }
+</style>
+
+</html>
